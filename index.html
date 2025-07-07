@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학급 매점 키오스크 - 문제 해결 버전</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f5f5f5;
+        }
+        .kiosk-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .kiosk-btn {
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .kiosk-btn:hover {
+            transform: translateY(-5px);
+        }
+        .product-card {
+            transition: transform 0.2s;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .product-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            object-position: center;
+            background-color: #f0f0f0;
+        }
+        .img-fallback {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            color: #666;
+            font-size: 18px;
+        }
+        .btn-lg {
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .cart-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .admin-section {
+            margin-bottom: 30px;
+        }
+        .admin-card {
+            transition: transform 0.2s;
+        }
+        .admin-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="kiosk-container">
+        <h1 class="text-4xl font-bold text-center my-8">학급 매점 키오스크</h1>
+        
+        <!-- HTML 파일에 모든 페이지의 코드를 포함합니다 -->
+        <!-- 각 페이지는 id로 구분하고, JavaScript로 페이지 전환을 구현합니다 -->
+        
+        <!-- 첫 화면 -->
+        <div id="home-page" class="page">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+                    <div class="col-span-1">
+                        <div class="kiosk-btn bg-blue-500 text-white" onclick="showPage('login-page')">
+                            <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
+                            <h2 class="text-2xl font-bold">로그인</h2>
+                        </div>
+                    </div>
+                    <div class="col-span-1">
+                        <div class="kiosk-btn bg-green-500 text-white" onclick="showPage('purchase-history-page')">
+                            <i class="fas fa-history fa-3x mb-3"></i>
+                            <h2 class="text-2xl font-bold">구매내역</h2>
+                        </div>
+                    </div>
+                    <div class="col-span-1">
+                        <div class="kiosk-btn bg-purple-500 text-white" onclick="showPage('menu-page')">
+                            <i class="fas fa-utensils fa-3x mb-3"></i>
+                            <h2 class="text-2xl font-bold">메뉴 보기</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 로그인 페이지 -->
+        <div id="login-page" class="page hidden">
+            <div class="bg-white p-8 rounded-lg shadow-lg max-w-md mx-auto">
+                <h2 class="text-2xl font-bold mb-6 text-center">로그인</h2>
+                <form id="login-form" autocomplete="off"> <!-- autocomplete="off" 추가 -->
+                    <div class="mb-4">
+                        <label for="username" class="block text-gray-700 font-bold mb-2">아이디</label>
+                        <input type="text" id="username" name="username" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="mb-6">
+                        <label for="password" class="block text-gray-700 font-bold mb-2">비밀번호</label>
+                        <input type="password" id="password" name="password" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <button type="button" onclick="login()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">로그인</button>
+                        <button type="button" onclick="showPage('home-page')" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">돌아가기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 구매내역 페이지 -->
+        <div id="purchase-history-page" class="page hidden">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold mb-6 text-center">학급 구매내역</h2>
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-500 text-white px-4 py-3">
+                        <h3 class="text-xl font-bold">학생별 구매액</h3>
+                    </div>
+                    <div class="p-4">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-4 py-2 text-left">학생 이름</th>
+                                    <th class="px-4 py-2 text-right">총 구매액</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchase-history-tbody">
+                                <!-- JavaScript로 데이터를 채웁니다 -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-gray-800 text-white">
+                                    <th class="px-4 py-2 text-left">전체 합계</th>
+                                    <th id="grand-total" class="px-4 py-2 text-right">0원</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button onclick="showPage('home-page')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
+                        첫 화면으로
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 메뉴 페이지 -->
+        <div id="menu-page" class="page hidden">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold mb-6 text-center">판매 상품 목록</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="menu-products">
+                    <!-- JavaScript로 상품 목록을 채웁니다 -->
+                </div>
+                <div class="text-center mt-8">
+                    <button onclick="showPage('home-page')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
+                        첫 화면으로
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사용자 메인 페이지 (상품 목록) -->
+        <div id="index-page" class="page hidden">
+            <nav class="navbar bg-blue-500 text-white p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <span class="text-xl font-bold">학급 매점 키오스크</span>
+                    <div class="flex items-center">
+                        <span id="user-info" class="mr-4">사용자: </span>
+                        <button onclick="viewCart()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded mr-2">
+                            <i class="fas fa-shopping-cart"></i> 장바구니
+                        </button>
+                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            로그아웃
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="container mx-auto px-4 py-8">
+                <h2 class="text-3xl font-bold mb-6">상품 목록</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="products-container">
+                    <!-- JavaScript로 상품 목록을 채웁니다 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 장바구니 페이지 -->
+        <div id="cart-page" class="page hidden">
+            <nav class="navbar bg-blue-500 text-white p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <span class="text-xl font-bold">장바구니</span>
+                    <div>
+                        <button onclick="showPage('index-page')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                            상품 목록으로
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="container mx-auto px-4 py-8">
+                <h2 class="text-3xl font-bold mb-6">장바구니 내역</h2>
+                
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+                    <div id="cart-items">
+                        <!-- JavaScript로 장바구니 항목을 채웁니다 -->
+                    </div>
+                    
+                    <div class="p-4 bg-gray-100 border-t border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-bold">총 금액:</span>
+                            <span id="cart-total" class="text-xl font-bold">0원</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button onclick="clearCart()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg text-lg mr-4">
+                        장바구니 비우기
+                    </button>
+                    <button onclick="placeOrder()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg text-lg">
+                        주문하기
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 관리자 대시보드 페이지 -->
+        <div id="admin-page" class="page hidden">
+            <nav class="navbar bg-gray-800 text-white p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <span class="text-xl font-bold">관리자 대시보드</span>
+                    <div>
+                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            로그아웃
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="container mx-auto px-4 py-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="col-span-1">
+                        <div class="admin-card bg-blue-500 text-white p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold mb-4">상품 관리</h3>
+                            <p class="mb-4">상품 추가, 수정, 삭제</p>
+                            <button onclick="showAdminProducts()" class="bg-white text-blue-500 hover:bg-blue-100 px-4 py-2 rounded">
+                                관리하기
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-span-1">
+                        <div class="admin-card bg-green-500 text-white p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold mb-4">사용자 관리</h3>
+                            <p class="mb-4">학생 계정 생성 및 관리</p>
+                            <button onclick="showAdminUsers()" class="bg-white text-green-500 hover:bg-green-100 px-4 py-2 rounded">
+                                관리하기
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-span-1">
+                        <div class="admin-card bg-purple-500 text-white p-6 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold mb-4">주문 관리</h3>
+                            <p class="mb-4">주문 내역 확인 및 관리</p>
+                            <button onclick="showAdminOrders()" class="bg-white text-purple-500 hover:bg-purple-100 px-4 py-2 rounded">
+                                관리하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 관리자 상품 관리 페이지 -->
+        <div id="admin-products-page" class="page hidden">
+            <nav class="navbar bg-gray-800 text-white p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <span class="text-xl font-bold">상품 관리</span>
+                    <div>
+                        <button onclick="showPage('admin-page')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                            대시보드로
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="container mx-auto px-4 py-8">
+                <div class="admin-section bg-white rounded-lg shadow-lg p-6 mb-8">
+                    <h3 class="text-2xl font-bold mb-4">상품 추가</h3>
+                    <form id="product-form" autocomplete="off"> <!-- autocomplete="off" 추가 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="col-span-1">
+                                <label class="block text-gray-700 font-bold mb-2">상품명</label>
+                                <input type="text" id="product-name" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-gray-700 font-bold mb-2">가격</label>
+                                <input type="number" id="product-price" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-gray-700 font-bold mb-2">이미지 URL</label>
+                                <input type="text" id="product-image" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-gray-700 font-bold mb-2">카테고리</label>
+                                <input type="text" id="product-category" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-gray-700 font-bold mb-2">재고</label>
+                                <input type="number" id="product-stock" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button type="button" onclick="addProduct()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                                상품 추가
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="admin-section bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-2xl font-bold mb-4">상품 목록</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-4 py-2 text-left">ID</th>
+                                    <th class="px-4 py-2 text-left">이름</th>
+                                    <th class="px-4 py-2 text-left">가격</th>
+                                    <th class="px-4 py-2 text-left">카테고리</th>
+                                    <th class="px-4 py-2 text-left">재고</th>
+                                    <th class="px-4 py-2 text-left">이미지</th>
+                                    <th class="px-4 py-2 text-left">작업</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-products-tbody">
+                                <!-- JavaScript로 상품 목록을 채웁니다 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 관리자 사용자 관리 페이지 -->
+        <div id="admin-users-page" class="page hidden">
+            <nav class="navbar bg-gray-800 text-white p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <span class="text-xl font-bold">사용자 관리</span>
+                    <div>
+                        <button onclick="showPage('admin-page')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                            대시보드로
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="container mx-auto px-4 py-8">
+                <div class="admin-section bg-white rounded-lg shadow-lg p-6 mb-8">
+                    <h3 class="text-2xl font-bold mb-4">사용자 추가</h3>
+                    <form id="user-form" autocomplete="off"> <!-- autocomplete="off" 추가 -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="col-span-1">
+                                <label class="block text-gray-700 font-bold mb-2">아이디</label>
+                                <input type="text" id="user-username" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-gray-700 font-bold mb-2">비밀번호</label>
+                                <input type="password" id="user-password" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-gray-700 font-bold mb-2">권한</label>
+                                <select id="user-is-admin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                                    <option value="false">학생</option>
+                                    <option value="true">관리자</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button type="button" onclick="addUser()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                                사용자 추가
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="admin-section bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-2xl font-bold mb-4">사용자 목록</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-4 py-2 text-left">ID</th>
+                                    <th class="px-4 py-2 text-left">아이디</th>
+                                    <th class="px-4 py-2 text-left">권한</th>
+                                    <th class="px-4 py-2 text-left">작업</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-tbody">
+                                <!-- JavaScript로 사용자 목록을 채웁니다 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 관리자 주문 관리 페이지 -->
+        <div id="admin-orders-page" class="page hidden">
+            <nav class="navbar bg-gray-800 text-white p-4">
+                <div class="container mx-auto flex justify-between items-center">
+                    <span class="text-xl font-bold">주문 관리</span>
+                    <div>
+                        <button onclick="showPage('admin-page')" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                            대시보드로
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="container mx-auto px-4 py-8">
+                <h2 class="text-3xl font-bold mb-6">주문 내역</h2>
+                
+                <!-- 각 사용자별 주문 내역 -->
+                <div id="admin-orders-container">
+                    <!-- JavaScript로 주문 내역을 채웁니다 -->
+                </div>
+                
+                <div class="text-center mt-8">
+                    <h2 id="admin-orders-total" class="text-2xl font-bold">전체 구매 금액: 0원</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 더미 데이터
+        const dummyUsers = [
+            { id: 1, username: 'admin', password: 'admin123', is_admin: true },
+            { id: 2, username: 'student1', password: 'student1', is_admin: false },
+            { id: 3, username: 'student2', password: 'student2', is_admin: false }
+        ];
+        
+        const dummyProducts = [
+            { id: 1, name: '과자', price: 1500, image_url: 'https://via.placeholder.com/200x200.png?text=과자', category: '간식', stock: 10 },
+            { id: 2, name: '음료수', price: 1200, image_url: 'https://via.placeholder.com/200x200.png?text=음료수', category: '음료', stock: 15 },
+            { id: 3, name: '아이스크림', price: 1000, image_url: 'https://via.placeholder.com/200x200.png?text=아이스크림', category: '간식', stock: 8 }
+        ];
+        
+        const dummyCart = [];
+        
+        const dummyOrders = [
+            { id: 1, user_id: 2, order_date: '2023-06-10 14:30', total_price: 2700, paid: false, items: [
+                { product: { id: 1, name: '과자', price: 1500 }, quantity: 1 },
+                { product: { id: 2, name: '음료수', price: 1200 }, quantity: 1 }
+            ]},
+            { id: 2, user_id: 3, order_date: '2023-06-11 10:15', total_price: 3000, paid: false, items: [
+                { product: { id: 1, name: '과자', price: 1500 }, quantity: 2 }
+            ]}
+        ];
+        
+        // 현재 로그인한 사용자
+        let currentUser = null;
+        
+        // 페이지 관리
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            document.getElementById(pageId).classList.remove('hidden');
+            
+            // 페이지에 따라 데이터 로드
+            if (pageId === 'menu-page') {
+                loadMenuProducts();
+            } else if (pageId === 'purchase-history-page') {
+                loadPurchaseHistory();
+            } else if (pageId === 'admin-products-page') {
+                loadAdminProducts();
+            } else if (pageId === 'admin-users-page') {
+                loadAdminUsers();
+            } else if (pageId === 'admin-orders-page') {
+                loadAdminOrders();
+            }
+        }
+        
+        // 초기 페이지 설정
+        showPage('home-page');
+        
+        // 로그인 기능
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const user = dummyUsers.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                
+                if (user.is_admin) {
+                    showPage('admin-page');
+                } else {
+                    document.getElementById('user-info').textContent = `사용자: ${user.username}`;
+                    loadProducts();
+                    showPage('index-page');
+                }
+            } else {
+                alert('아이디 또는 비밀번호가 올바르지 않습니다.');
+            }
+        }
+        
+        // 로그아웃 기능
+        function logout() {
+            currentUser = null;
+            // 로그아웃 시 폼 초기화
+            document.getElementById('login-form').reset();
+            // 모든 폼 초기화
+            document.getElementById('product-form').reset();
+            document.getElementById('user-form').reset();
+            showPage('home-page');
+        }
+        
+        // 상품 목록 로드 (사용자용)
+        function loadProducts() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+            
+            dummyProducts.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card bg-white rounded-lg shadow-lg overflow-hidden';
+                
+                // 이미지 처리 개선: onerror 속성 추가
+                card.innerHTML = `
+                    <div class="relative">
+                        <img src="${product.image_url}" alt="${product.name}" class="product-img" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="img-fallback" style="display: none;">
+                            <span>${product.name}</span>
+                        </div>
+                        <div class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded">
+                            ${product.price}원
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">${product.name}</h3>
+                        <p class="text-gray-600 mb-4">카테고리: ${product.category}</p>
+                        <p class="text-gray-600 mb-4">재고: ${product.stock}개</p>
+                        <button onclick="addToCart(${product.id})" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded">
+                            장바구니에 담기
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        // 메뉴 상품 목록 로드 (로그인 없이 볼 수 있는)
+        function loadMenuProducts() {
+            const container = document.getElementById('menu-products');
+            container.innerHTML = '';
+            
+            dummyProducts.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card bg-white rounded-lg shadow-lg overflow-hidden';
+                
+                // 이미지 처리 개선: onerror 속성 추가
+                card.innerHTML = `
+                    <div class="relative">
+                        <img src="${product.image_url}" alt="${product.name}" class="product-img" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="img-fallback" style="display: none;">
+                            <span>${product.name}</span>
+                        </div>
+                        <div class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded">
+                            ${product.price}원
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold mb-2">${product.name}</h3>
+                        <p class="text-gray-600 mb-4">카테고리: ${product.category}</p>
+                        <p class="text-gray-600 mb-4">재고: ${product.stock}개</p>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        // 장바구니에 상품 추가
+        function addToCart(productId) {
+            const product = dummyProducts.find(p => p.id === productId);
+            
+            if (!product) return;
+            
+            const existingItem = dummyCart.find(item => 
+                item.product_id === productId && item.user_id === currentUser.id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                dummyCart.push({
+                    id: dummyCart.length + 1,
+                    user_id: currentUser.id,
+                    product_id: productId,
+                    quantity: 1
+                });
+            }
+            
+            alert(`${product.name}을(를) 장바구니에 담았습니다.`);
+        }
+        
+        // 장바구니 보기
+        function viewCart() {
+            const container = document.getElementById('cart-items');
+            container.innerHTML = '';
+            
+            let totalPrice = 0;
+            const userCartItems = dummyCart.filter(item => item.user_id === currentUser.id);
+            
+            if (userCartItems.length === 0) {
+                container.innerHTML = '<div class="p-4 text-center text-gray-500">장바구니가 비어있습니다.</div>';
+                document.getElementById('cart-total').textContent = '0원';
+            } else {
+                userCartItems.forEach(item => {
+                    const product = dummyProducts.find(p => p.id === item.product_id);
+                    const itemPrice = product.price * item.quantity;
+                    totalPrice += itemPrice;
+                    
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item p-4 border-b border-gray-200';
+                    cartItem.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-lg font-bold">${product.name}</h3>
+                                <p class="text-gray-600">${product.price}원 x ${item.quantity} = ${itemPrice}원</p>
+                            </div>
+                            <div class="flex items-center">
+                                <button onclick="updateCartItem(${item.id}, ${item.quantity - 1})" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded mr-2">-</button>
+                                <span class="mx-2">${item.quantity}</span>
+                                <button onclick="updateCartItem(${item.id}, ${item.quantity + 1})" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded mr-2">+</button>
+                                <button onclick="removeCartItem(${item.id})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">삭제</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(cartItem);
+                });
+                
+                document.getElementById('cart-total').textContent = totalPrice + '원';
+            }
+            
+            showPage('cart-page');
+        }
+        
+        // 장바구니 항목 수정
+        function updateCartItem(itemId, newQuantity) {
+            if (newQuantity <= 0) {
+                removeCartItem(itemId);
+                return;
+            }
+            
+            const item = dummyCart.find(item => item.id === itemId);
+            if (item) {
+                item.quantity = newQuantity;
+            }
+            
+            viewCart();
+        }
+        
+        // 장바구니 항목 삭제
+        function removeCartItem(itemId) {
+            const index = dummyCart.findIndex(item => item.id === itemId);
+            if (index !== -1) {
+                dummyCart.splice(index, 1);
+            }
+            
+            viewCart();
+        }
+        
+        // 장바구니 비우기
+        function clearCart() {
+            const userCartItems = dummyCart.filter(item => item.user_id === currentUser.id);
+            
+            userCartItems.forEach(item => {
+                const index = dummyCart.findIndex(i => i.id === item.id);
+                if (index !== -1) {
+                    dummyCart.splice(index, 1);
+                }
+            });
+            
+            viewCart();
+        }
+        
+        // 주문하기
+        function placeOrder() {
+            const userCartItems = dummyCart.filter(item => item.user_id === currentUser.id);
+            
+            if (userCartItems.length === 0) {
+                alert('장바구니가 비어있습니다.');
+                return;
+            }
+            
+            let totalPrice = 0;
+            const orderItems = [];
+            
+            userCartItems.forEach(item => {
+                const product = dummyProducts.find(p => p.id === item.product_id);
+                const itemPrice = product.price * item.quantity;
+                totalPrice += itemPrice;
+                
+                orderItems.push({
+                    product: {
+                        id: product.id,
+                        name: product.name,
+                        price: product.price
+                    },
+                    quantity: item.quantity
+                });
+                
+                // 재고 감소
+                const productIndex = dummyProducts.findIndex(p => p.id === item.product_id);
+                if (productIndex !== -1) {
+                    dummyProducts[productIndex].stock -= item.quantity;
+                }
+            });
+            
+            const newOrder = {
+                id: dummyOrders.length + 1,
+                user_id: currentUser.id,
+                order_date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                total_price: totalPrice,
+                paid: false,
+                items: orderItems
+            };
+            
+            dummyOrders.push(newOrder);
+            
+            // 장바구니 비우기
+            clearCart();
+            
+            alert('주문이 완료되었습니다.');
+            showPage('index-page');
+        }
+        
+        // 구매내역 로드
+        function loadPurchaseHistory() {
+            const tbody = document.getElementById('purchase-history-tbody');
+            tbody.innerHTML = '';
+            
+            const userTotals = {};
+            let grandTotal = 0;
+            
+            dummyUsers.filter(user => !user.is_admin).forEach(user => {
+                const userOrders = dummyOrders.filter(order => order.user_id === user.id && !order.paid);
+                const total = userOrders.reduce((sum, order) => sum + order.total_price, 0);
+                
+                userTotals[user.id] = total;
+                grandTotal += total;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-2 border-b">${user.username}</td>
+                    <td class="px-4 py-2 border-b text-right">${total}원</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('grand-total').textContent = grandTotal + '원';
+        }
+        
+        // 관리자 상품 관리
+        function showAdminProducts() {
+            showPage('admin-products-page');
+        }
+        
+        // 관리자 사용자 관리
+        function showAdminUsers() {
+            showPage('admin-users-page');
+        }
+        
+        // 관리자 주문 관리
+        function showAdminOrders() {
+            showPage('admin-orders-page');
+        }
+        
+        // 관리자 상품 목록 로드
+        function loadAdminProducts() {
+            const tbody = document.getElementById('admin-products-tbody');
+            tbody.innerHTML = '';
+            
+            dummyProducts.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-2 border-b">${product.id}</td>
+                    <td class="px-4 py-2 border-b">${product.name}</td>
+                    <td class="px-4 py-2 border-b">${product.price}원</td>
+                    <td class="px-4 py-2 border-b">${product.category}</td>
+                    <td class="px-4 py-2 border-b">${product.stock}개</td>
+                    <td class="px-4 py-2 border-b">
+                        <img src="${product.image_url}" alt="${product.name}" class="h-16 w-16 object-cover" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div class="h-16 w-16 bg-gray-100 flex items-center justify-center text-xs" style="display: none;">
+                            이미지 없음
+                        </div>
+                    </td>
+                    <td class="px-4 py-2 border-b">
+                        <button onclick="editProduct(${product.id})" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded mr-2">수정</button>
+                        <button onclick="deleteProduct(${product.id})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">삭제</button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // 관리자 사용자 목록 로드
+        function loadAdminUsers() {
+            const tbody = document.getElementById('admin-users-tbody');
+            tbody.innerHTML = '';
+            
+            dummyUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-2 border-b">${user.id}</td>
+                    <td class="px-4 py-2 border-b">${user.username}</td>
+                    <td class="px-4 py-2 border-b">${user.is_admin ? '관리자' : '학생'}</td>
+                    <td class="px-4 py-2 border-b">
+                        <button onclick="editUser(${user.id})" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded mr-2">수정</button>
+                        <button onclick="deleteUser(${user.id})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">삭제</button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // 관리자 주문 목록 로드
+        function loadAdminOrders() {
+            const container = document.getElementById('admin-orders-container');
+            container.innerHTML = '';
+            
+            let grandTotal = 0;
+            const userOrders = {};
+            const userTotals = {};
+            
+            dummyUsers.filter(user => !user.is_admin).forEach(user => {
+                const orders = dummyOrders.filter(order => order.user_id === user.id && !order.paid);
+                const total = orders.reduce((sum, order) => sum + order.total_price, 0);
+                
+                userOrders[user.username] = orders;
+                userTotals[user.username] = total;
+                grandTotal += total;
+            });
+            
+            for (const [username, orders] of Object.entries(userOrders)) {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-lg mb-6 overflow-hidden';
+                
+                const header = document.createElement('div');
+                header.className = 'bg-blue-500 text-white p-4 flex justify-between items-center';
+                header.innerHTML = `
+                    <h3 class="text-xl font-bold">${username}의 주문 내역</h3>
+                    <div>
+                        <span class="bg-red-500 text-white px-3 py-1 rounded mr-2">총액: ${userTotals[username]}원</span>
+                        <button onclick="markPaid('${username}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                            <i class="fas fa-check mr-2"></i>입금 확인 완료
+                        </button>
+                    </div>
+                `;
+                
+                card.appendChild(header);
+                
+                const body = document.createElement('div');
+                body.className = 'p-4';
+                
+                if (orders.length === 0) {
+                    body.innerHTML = '<p class="text-gray-500 text-center">주문 내역이 없습니다.</p>';
+                } else {
+                    const table = document.createElement('table');
+                    table.className = 'w-full';
+                    
+                    let tableContent = `
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="px-4 py-2 text-left">주문 일시</th>
+                                <th class="px-4 py-2 text-left">상품 목록</th>
+                                <th class="px-4 py-2 text-left">총액</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    `;
+                    
+                    orders.forEach(order => {
+                        let itemsList = '<ul>';
+                        order.items.forEach(item => {
+                            itemsList += `<li>${item.product.name} x ${item.quantity} = ${item.product.price * item.quantity}원</li>`;
+                        });
+                        itemsList += '</ul>';
+                        
+                        tableContent += `
+                            <tr>
+                                <td class="px-4 py-2 border-b">${order.order_date}</td>
+                                <td class="px-4 py-2 border-b">${itemsList}</td>
+                                <td class="px-4 py-2 border-b">${order.total_price}원</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    tableContent += '</tbody>';
+                    table.innerHTML = tableContent;
+                    body.appendChild(table);
+                }
+                
+                card.appendChild(body);
+                container.appendChild(card);
+            }
+            
+            document.getElementById('admin-orders-total').textContent = `전체 구매 금액: ${grandTotal}원`;
+        }
+        
+        // 입금 확인 완료 처리
+        function markPaid(username) {
+            const user = dummyUsers.find(u => u.username === username);
+            if (!user) return;
+            
+            const orders = dummyOrders.filter(order => order.user_id === user.id && !order.paid);
+            orders.forEach(order => {
+                order.paid = true;
+            });
+            
+            alert(`${username}의 구매내역이 결제 완료로 처리되었습니다.`);
+            loadAdminOrders();
+        }
+        
+        // 상품 추가
+        function addProduct() {
+            const name = document.getElementById('product-name').value;
+            const price = parseInt(document.getElementById('product-price').value);
+            const image_url = document.getElementById('product-image').value;
+            const category = document.getElementById('product-category').value;
+            const stock = parseInt(document.getElementById('product-stock').value);
+            
+            if (!name || isNaN(price) || !category || isNaN(stock)) {
+                alert('모든 필드를 올바르게 입력해주세요.');
+                return;
+            }
+            
+            const newProduct = {
+                id: dummyProducts.length + 1,
+                name,
+                price,
+                image_url,
+                category,
+                stock
+            };
+            
+            dummyProducts.push(newProduct);
+            
+            alert('상품이 추가되었습니다.');
+            document.getElementById('product-form').reset();
+            loadAdminProducts();
+        }
+        
+        // 상품 수정
+        function editProduct(productId) {
+            const product = dummyProducts.find(p => p.id === productId);
+            if (!product) return;
+            
+            document.getElementById('product-name').value = product.name;
+            document.getElementById('product-price').value = product.price;
+            document.getElementById('product-image').value = product.image_url;
+            document.getElementById('product-category').value = product.category;
+            document.getElementById('product-stock').value = product.stock;
+            
+            // 상품 ID를 저장하고 버튼 변경
+            const addButton = document.querySelector('#product-form button');
+            addButton.textContent = '상품 수정';
+            addButton.onclick = function() {
+                updateProduct(productId);
+            };
+        }
+        
+        // 상품 업데이트
+        function updateProduct(productId) {
+            const product = dummyProducts.find(p => p.id === productId);
+            if (!product) return;
+            
+            product.name = document.getElementById('product-name').value;
+            product.price = parseInt(document.getElementById('product-price').value);
+            product.image_url = document.getElementById('product-image').value;
+            product.category = document.getElementById('product-category').value;
+            product.stock = parseInt(document.getElementById('product-stock').value);
+            
+            alert('상품이 수정되었습니다.');
+            
+            // 폼 초기화 및 버튼 복원
+            document.getElementById('product-form').reset();
+            const addButton = document.querySelector('#product-form button');
+            addButton.textContent = '상품 추가';
+            addButton.onclick = addProduct;
+            
+            loadAdminProducts();
+        }
+        
+        // 상품 삭제
+        function deleteProduct(productId) {
+            if (!confirm('정말 이 상품을 삭제하시겠습니까?')) return;
+            
+            const index = dummyProducts.findIndex(p => p.id === productId);
+            if (index !== -1) {
+                dummyProducts.splice(index, 1);
+                alert('상품이 삭제되었습니다.');
+                loadAdminProducts();
+            }
+        }
+        
+        // 사용자 추가
+        function addUser() {
+            const username = document.getElementById('user-username').value;
+            const password = document.getElementById('user-password').value;
+            const is_admin = document.getElementById('user-is-admin').value === 'true';
+            
+            if (!username || !password) {
+                alert('모든 필드를 입력해주세요.');
+                return;
+            }
+            
+            if (dummyUsers.some(u => u.username === username)) {
+                alert('이미 존재하는 아이디입니다.');
+                return;
+            }
+            
+            const newUser = {
+                id: dummyUsers.length + 1,
+                username,
+                password,
+                is_admin
+            };
+            
+            dummyUsers.push(newUser);
+            
+            alert('사용자가 추가되었습니다.');
+            document.getElementById('user-form').reset();
+            loadAdminUsers();
+        }
+        
+        // 사용자 수정
+        function editUser(userId) {
+            const user = dummyUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            document.getElementById('user-username').value = user.username;
+            document.getElementById('user-password').value = user.password;
+            document.getElementById('user-is-admin').value = user.is_admin.toString();
+            
+            // 사용자 ID를 저장하고 버튼 변경
+            const addButton = document.querySelector('#user-form button');
+            addButton.textContent = '사용자 수정';
+            addButton.onclick = function() {
+                updateUser(userId);
+            };
+        }
+        
+        // 사용자 업데이트
+        function updateUser(userId) {
+            const user = dummyUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            const newUsername = document.getElementById('user-username').value;
+            const existingUser = dummyUsers.find(u => u.username === newUsername && u.id !== userId);
+            if (existingUser) {
+                alert('이미 존재하는 아이디입니다.');
+                return;
+            }
+            
+            user.username = newUsername;
+            user.password = document.getElementById('user-password').value;
+            user.is_admin = document.getElementById('user-is-admin').value === 'true';
+            
+            alert('사용자가 수정되었습니다.');
+            
+            // 폼 초기화 및 버튼 복원
+            document.getElementById('user-form').reset();
+            const addButton = document.querySelector('#user-form button');
+            addButton.textContent = '사용자 추가';
+            addButton.onclick = addUser;
+            
+            loadAdminUsers();
+        }
+        
+        // 사용자 삭제
+        function deleteUser(userId) {
+            if (!confirm('정말 이 사용자를 삭제하시겠습니까?')) return;
+            
+            const index = dummyUsers.findIndex(u => u.id === userId);
+            if (index !== -1) {
+                dummyUsers.splice(index, 1);
+                alert('사용자가 삭제되었습니다.');
+                loadAdminUsers();
+            }
+        }
+    </script>
+</body>
+</html>
